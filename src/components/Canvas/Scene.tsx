@@ -140,27 +140,101 @@ function SceneContent({ photos }: SceneProps) {
 
 export function Scene() {
   const photos = useStore((state) => state.photos)
+  const [webglError, setWebglError] = useState<string | null>(null)
+  
+  // 检测是否为移动设备
+  const isMobile = () => {
+    if (typeof window === 'undefined') return false
+    return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) ||
+           (window.innerWidth <= 768) ||
+           ('ontouchstart' in window)
+  }
   
   // 根据设备性能动态调整 dpr
   const getDPR = () => {
     if (typeof window === 'undefined') return 1
-    // 检测是否为低性能设备
-    const isLowEnd = navigator.hardwareConcurrency <= 4 || 
-                     (navigator as any).deviceMemory <= 4
+    const mobile = isMobile()
     const baseDPR = window.devicePixelRatio || 1
+    
+    if (mobile) {
+      // 移动设备：限制 DPR 以提升性能
+      return Math.min(baseDPR, 1.5)
+    }
+    
+    // 桌面设备：检测是否为低性能设备
+    const isLowEnd = (navigator.hardwareConcurrency && navigator.hardwareConcurrency <= 4) || 
+                     ((navigator as any).deviceMemory && (navigator as any).deviceMemory <= 4)
     return isLowEnd ? Math.min(baseDPR, 1.5) : Math.min(baseDPR, 2)
+  }
+  
+  // WebGL 检测
+  useEffect(() => {
+    const canvas = document.createElement('canvas')
+    const gl = canvas.getContext('webgl') || canvas.getContext('experimental-webgl') as WebGLRenderingContext | null
+    
+    if (!gl) {
+      setWebglError('您的设备不支持 WebGL，无法显示 3D 内容。请尝试更新浏览器或设备。')
+      return
+    }
+    
+    // 检查 WebGL 扩展支持
+    const debugInfo = gl.getExtension('WEBGL_debug_renderer_info')
+    if (debugInfo) {
+      const vendor = gl.getParameter(debugInfo.UNMASKED_VENDOR_WEBGL)
+      const renderer = gl.getParameter(debugInfo.UNMASKED_RENDERER_WEBGL)
+      console.log('WebGL Vendor:', vendor)
+      console.log('WebGL Renderer:', renderer)
+    }
+  }, [])
+
+  // 如果 WebGL 不支持，显示错误信息
+  if (webglError) {
+    return (
+      <div style={{
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        height: '100vh',
+        background: 'linear-gradient(to bottom, #0a0e27 0%, #1a0d2e 50%, #2d1b3d 100%)',
+        color: '#fff',
+        padding: '20px',
+        textAlign: 'center',
+        flexDirection: 'column',
+        gap: '20px'
+      }}>
+        <div style={{ fontSize: '48px' }}>⚠️</div>
+        <div style={{ fontSize: '18px', maxWidth: '500px' }}>{webglError}</div>
+      </div>
+    )
   }
 
   return (
     <Canvas
       gl={{
-        antialias: true,
+        antialias: !isMobile(), // 移动设备禁用抗锯齿以提升性能
         alpha: false,
-        powerPreference: 'high-performance',
+        powerPreference: isMobile() ? 'default' : 'high-performance', // 移动设备使用默认电源偏好
+        failIfMajorPerformanceCaveat: false, // 允许在低性能设备上运行
+        stencil: false, // 禁用模板缓冲以提升性能
+        depth: true,
+        preserveDrawingBuffer: false,
       }}
       dpr={getDPR()}
       style={{ 
-        background: 'linear-gradient(to bottom, #0a0e27 0%, #1a0d2e 50%, #2d1b3d 100%)'
+        background: 'linear-gradient(to bottom, #0a0e27 0%, #1a0d2e 50%, #2d1b3d 100%)',
+        touchAction: 'none', // 防止触摸事件被浏览器处理
+      }}
+      onCreated={({ gl }) => {
+        // 优化移动设备的渲染设置
+        if (isMobile()) {
+          gl.setPixelRatio(Math.min(window.devicePixelRatio, 1.5))
+          // 禁用某些高消耗功能
+          gl.shadowMap?.enabled && (gl.shadowMap.enabled = false)
+        }
+      }}
+      onError={(error) => {
+        console.error('Canvas error:', error)
+        setWebglError('渲染错误：' + (error instanceof Error ? error.message : '未知错误'))
       }}
     >
       <Suspense fallback={null}>
@@ -172,6 +246,15 @@ export function Scene() {
           minDistance={5}
           maxDistance={30}
           target={[0, 5, 0]}
+          touches={{
+            ONE: 2, // 单指触摸旋转
+            TWO: 1, // 双指触摸缩放和移动
+          }}
+          rotateSpeed={isMobile() ? 0.5 : 1}
+          zoomSpeed={isMobile() ? 0.8 : 1}
+          panSpeed={isMobile() ? 0.8 : 1}
+          enableDamping={true}
+          dampingFactor={0.05}
         />
         <LoadingOverlay />
         <SceneContent photos={photos} />
