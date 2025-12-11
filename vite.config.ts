@@ -20,24 +20,15 @@ export default defineConfig({
     rollupOptions: {
       output: {
         manualChunks: (id: string) => {
-          // 更细粒度的代码分割
+          // 代码分割策略：确保依赖关系正确
           if (id.indexOf('node_modules') !== -1) {
-            // React 和所有 React 相关库必须在同一个 chunk，避免依赖问题
-            if (id.indexOf('react') !== -1 || 
-                id.indexOf('react-dom') !== -1 ||
-                id.indexOf('@react-three') !== -1 ||
-                id.indexOf('scheduler') !== -1) {
-              return 'react-vendor'
-            }
-            // Three.js 核心
-            if (id.indexOf('three') !== -1) {
+            // Three.js 核心 - 独立分割（不依赖 React）
+            if (id.indexOf('three') !== -1 && id.indexOf('@react-three') === -1) {
               return 'three-core'
             }
-            // Zustand 状态管理
-            if (id.indexOf('zustand') !== -1) {
-              return 'zustand'
-            }
-            // 其他第三方库
+            // 所有其他库（包括 React、@react-three、zustand 等）
+            // 都放在一个 vendor chunk 中，确保依赖关系正确
+            // 这样可以避免 chunk 加载顺序导致的依赖问题
             return 'vendor'
           }
         },
