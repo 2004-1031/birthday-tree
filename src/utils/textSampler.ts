@@ -13,7 +13,14 @@ export function clearTextPositionCache(): void {
 
 // 在字体加载完成后，清除使用默认字体的缓存并强制重新生成
 if (typeof document !== 'undefined' && document.fonts && document.fonts.ready) {
+  // 设置字体加载超时（3秒），避免无限等待
+  const fontLoadTimeout = setTimeout(() => {
+    console.warn('Font loading timeout - proceeding with fallback fonts')
+    window.dispatchEvent(new CustomEvent('fonts-timeout'))
+  }, 3000)
+
   document.fonts.ready.then(() => {
+    clearTimeout(fontLoadTimeout)
     console.log('Fonts loaded, clearing default font cache...')
     // 清除所有包含 'default' 的缓存键
     const keysToDelete: string[] = []
@@ -29,11 +36,13 @@ if (typeof document !== 'undefined' && document.fonts && document.fonts.ready) {
       window.dispatchEvent(new CustomEvent('fonts-loaded'))
     }
   }).catch((e) => {
+    clearTimeout(fontLoadTimeout)
     console.warn('Font loading check failed:', e)
   })
   
   // 也监听字体加载事件
   document.fonts.addEventListener('loadingdone', () => {
+    clearTimeout(fontLoadTimeout)
     console.log('Fonts loading done event fired')
     const keysToDelete: string[] = []
     textPositionCache.forEach((_, key) => {
@@ -46,6 +55,13 @@ if (typeof document !== 'undefined' && document.fonts && document.fonts.ready) {
       console.log(`Cleared ${keysToDelete.length} default font cache entries`)
       window.dispatchEvent(new CustomEvent('fonts-loaded'))
     }
+  })
+}
+
+// 监听字体超时事件（从 index.html 触发）
+if (typeof window !== 'undefined') {
+  window.addEventListener('fonts-timeout', () => {
+    console.log('Font timeout event received - using fallback fonts')
   })
 }
 

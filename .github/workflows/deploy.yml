@@ -34,6 +34,15 @@ jobs:
 
       - name: Build
         run: npm run build
+        env:
+          NODE_ENV: production
+          
+      - name: Check build output size
+        run: |
+          echo "Build output size:"
+          du -sh dist
+          echo "Largest files:"
+          find dist -type f -exec du -h {} + | sort -rh | head -10
 
       - name: Setup Pages
         uses: actions/configure-pages@v4

@@ -5,13 +5,30 @@
     <link rel="icon" type="image/svg+xml" href="/vite.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="description" content="Interactive 3D Birthday Tree - A high-fidelity 3D interactive experience" />
+    <!-- 性能优化：DNS 预解析和预连接 -->
+    <link rel="dns-prefetch" href="https://fonts.googleapis.com" />
+    <link rel="dns-prefetch" href="https://fonts.gstatic.com" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <!-- 性能优化：资源提示 -->
+    <meta http-equiv="x-dns-prefetch-control" content="on" />
     <!-- 预加载关键资源 -->
     <link rel="dns-prefetch" href="https://fonts.googleapis.com" />
     <link rel="dns-prefetch" href="https://fonts.gstatic.com" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link href="https://fonts.googleapis.com/css2?family=Great+Vibes&family=Dancing+Script:wght@400;700&family=Pacifico&display=swap" rel="stylesheet" media="print" onload="this.media='all'" />
+    <!-- 优化字体加载：添加超时机制，避免阻塞渲染 -->
+    <link href="https://fonts.googleapis.com/css2?family=Great+Vibes&family=Dancing+Script:wght@400;700&family=Pacifico&display=swap" rel="stylesheet" media="print" onload="this.media='all'; this.onload=null;" />
     <noscript><link href="https://fonts.googleapis.com/css2?family=Great+Vibes&family=Dancing+Script:wght@400;700&family=Pacifico&display=swap" rel="stylesheet" /></noscript>
+    <script>
+      // 字体加载超时处理：如果 3 秒内未加载，触发 fallback
+      setTimeout(function() {
+        if (document.fonts && !document.fonts.check('12px "Great Vibes"')) {
+          console.warn('Fonts loading timeout, using fallback fonts');
+          document.dispatchEvent(new CustomEvent('fonts-timeout'));
+        }
+      }, 3000);
+    </script>
     <title>Arix Signature Interactive Christmas Tree</title>
     <style>
       * {
