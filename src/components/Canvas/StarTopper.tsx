@@ -2,11 +2,10 @@ import { useRef, useMemo } from 'react'
 import { useFrame } from '@react-three/fiber'
 import * as THREE from 'three'
 import { useStore, TreeMorphState } from '../../store/useStore'
-import { easeInOutCubic } from '../../utils/math'
 
 export function StarTopper() {
   const starRef = useRef<THREE.Group>(null)
-  const { currentState, transitionProgress } = useStore()
+  const { currentState } = useStore()
 
   // 创建星星几何体 - 五角星形状
   const starGeometry = useMemo(() => {
@@ -62,7 +61,6 @@ export function StarTopper() {
     if (!starRef.current) return
 
     const time = state.clock.elapsedTime
-    const easedProgress = easeInOutCubic(transitionProgress)
 
     // 星星位置：在圣诞树顶部
     const treeHeight = 8

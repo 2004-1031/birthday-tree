@@ -39,7 +39,7 @@ export function PhotoSystem({ photos, textures }: PhotoSystemProps) {
     const meshes: THREE.Mesh[] = []
     const baseSize = 1.0 // 基础尺寸，保持较大
 
-    photos.forEach((photo, index) => {
+    photos.forEach((_photo, index) => {
       const texture = textures[index]
       if (!texture) return
 

@@ -36,14 +36,14 @@ function SceneContent({ photos }: SceneProps) {
 
           // 然后加载纹理，等待图片完全加载
           const texture = await new Promise<THREE.Texture>((resolve, reject) => {
-            const texture = loader.load(
+            loader.load(
               dataUrl,
-              (texture) => {
+              (loadedTexture) => {
                 // 纹理加载成功
-                texture.minFilter = THREE.LinearFilter
-                texture.magFilter = THREE.LinearFilter
-                texture.colorSpace = THREE.SRGBColorSpace
-                resolve(texture)
+                loadedTexture.minFilter = THREE.LinearFilter
+                loadedTexture.magFilter = THREE.LinearFilter
+                loadedTexture.colorSpace = THREE.SRGBColorSpace
+                resolve(loadedTexture)
               },
               undefined,
               (error) => {
