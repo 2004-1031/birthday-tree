@@ -116,8 +116,14 @@ function SceneContent({ photos }: SceneProps) {
       <pointLight position={[-10, 5, -5]} intensity={0.4} color={0x9d4edd} />
       <pointLight position={[10, 5, -5]} intensity={0.4} color={0x4a90e2} />
 
-      {/* 环境贴图（可选，用于反射） */}
-      <Environment preset="sunset" />
+      {/* 环境贴图（延迟加载，使用更轻量的预设，降低强度以减少加载时间） */}
+      <Suspense fallback={null}>
+        <Environment 
+          preset="night" 
+          environmentIntensity={0.3}
+          resolution={256}
+        />
+      </Suspense>
 
       {/* 主要系统 */}
       <FoliageSystem />
@@ -134,6 +140,16 @@ function SceneContent({ photos }: SceneProps) {
 
 export function Scene() {
   const photos = useStore((state) => state.photos)
+  
+  // 根据设备性能动态调整 dpr
+  const getDPR = () => {
+    if (typeof window === 'undefined') return 1
+    // 检测是否为低性能设备
+    const isLowEnd = navigator.hardwareConcurrency <= 4 || 
+                     (navigator as any).deviceMemory <= 4
+    const baseDPR = window.devicePixelRatio || 1
+    return isLowEnd ? Math.min(baseDPR, 1.5) : Math.min(baseDPR, 2)
+  }
 
   return (
     <Canvas
@@ -142,7 +158,7 @@ export function Scene() {
         alpha: false,
         powerPreference: 'high-performance',
       }}
-      dpr={[1, 2]}
+      dpr={getDPR()}
       style={{ 
         background: 'linear-gradient(to bottom, #0a0e27 0%, #1a0d2e 50%, #2d1b3d 100%)'
       }}
