@@ -1,5 +1,5 @@
-import { useRef, useMemo } from 'react'
-import { useFrame } from '@react-three/fiber'
+import { useRef, useMemo, useEffect } from 'react'
+import { useFrame, useThree } from '@react-three/fiber'
 import * as THREE from 'three'
 import { useStore, TreeMorphState } from '../../store/useStore'
 
@@ -39,22 +39,31 @@ export function StarTopper() {
     return new THREE.ExtrudeGeometry(shape, extrudeSettings)
   }, [])
 
-  // 水晶质感材质
-  const starMaterial = useMemo(
-    () =>
-      new THREE.MeshStandardMaterial({
-        color: 0xffffff,
-        metalness: 0.9,
-        roughness: 0.1,
-        emissive: new THREE.Color(0xffd700),
-        emissiveIntensity: 0.5,
-        envMapIntensity: 2.0,
-        transparent: true,
-        opacity: 0.95,
-        side: THREE.DoubleSide,
-      }),
-    []
-  )
+  const { scene } = useThree()
+  
+  // 水晶质感材质 - 需要环境贴图来产生反光效果
+  const starMaterial = useMemo(() => {
+    const material = new THREE.MeshStandardMaterial({
+      color: 0xffffff,
+      metalness: 0.95,
+      roughness: 0.05,
+      emissive: new THREE.Color(0xffd700),
+      emissiveIntensity: 0.3,
+      envMapIntensity: 3.0, // 增加环境贴图强度以增强反光
+      transparent: true,
+      opacity: 0.98,
+      side: THREE.DoubleSide,
+    })
+    return material
+  }, [])
+  
+  // 确保环境贴图被应用到材质
+  useEffect(() => {
+    if (scene.environment) {
+      starMaterial.envMap = scene.environment
+      starMaterial.needsUpdate = true
+    }
+  }, [scene.environment, starMaterial])
 
   // 动画循环
   useFrame((state) => {

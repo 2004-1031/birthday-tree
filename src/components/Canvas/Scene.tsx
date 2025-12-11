@@ -116,12 +116,12 @@ function SceneContent({ photos }: SceneProps) {
       <pointLight position={[-10, 5, -5]} intensity={0.4} color={0x9d4edd} />
       <pointLight position={[10, 5, -5]} intensity={0.4} color={0x4a90e2} />
 
-      {/* 环境贴图（延迟加载，使用更轻量的预设，降低强度以减少加载时间） */}
+      {/* 环境贴图（延迟加载，用于星星的反光效果） */}
       <Suspense fallback={null}>
         <Environment 
           preset="night" 
-          environmentIntensity={0.3}
-          resolution={256}
+          environmentIntensity={1.5}
+          resolution={512}
         />
       </Suspense>
 

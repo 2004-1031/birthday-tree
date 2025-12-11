@@ -10,7 +10,7 @@ function App() {
         <Scene />
       </Suspense>
       <Overlay />
-      <Loader />
+      {/* 移除重复的 Loader，LoadingOverlay 已经在 Scene 内部处理了 */}
     </>
   )
 }

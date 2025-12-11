@@ -21,13 +21,13 @@
     <link href="https://fonts.googleapis.com/css2?family=Great+Vibes&family=Dancing+Script:wght@400;700&family=Pacifico&display=swap" rel="stylesheet" media="print" onload="this.media='all'; this.onload=null;" />
     <noscript><link href="https://fonts.googleapis.com/css2?family=Great+Vibes&family=Dancing+Script:wght@400;700&family=Pacifico&display=swap" rel="stylesheet" /></noscript>
     <script>
-      // 字体加载超时处理：如果 3 秒内未加载，触发 fallback
+      // 字体加载超时处理：如果 10 秒内未加载，触发 fallback（延长超时时间）
       setTimeout(function() {
         if (document.fonts && !document.fonts.check('12px "Great Vibes"')) {
           console.warn('Fonts loading timeout, using fallback fonts');
           document.dispatchEvent(new CustomEvent('fonts-timeout'));
         }
-      }, 3000);
+      }, 10000);
     </script>
     <title>Arix Signature Interactive Christmas Tree</title>
     <style>
