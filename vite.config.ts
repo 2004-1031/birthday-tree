@@ -22,21 +22,16 @@ export default defineConfig({
         manualChunks: (id: string) => {
           // 更细粒度的代码分割
           if (id.indexOf('node_modules') !== -1) {
-            // React 相关
-            if (id.indexOf('react') !== -1 || id.indexOf('react-dom') !== -1) {
+            // React 和所有 React 相关库必须在同一个 chunk，避免依赖问题
+            if (id.indexOf('react') !== -1 || 
+                id.indexOf('react-dom') !== -1 ||
+                id.indexOf('@react-three') !== -1 ||
+                id.indexOf('scheduler') !== -1) {
               return 'react-vendor'
             }
             // Three.js 核心
-            if (id.indexOf('three') !== -1 && id.indexOf('@react-three') === -1) {
+            if (id.indexOf('three') !== -1) {
               return 'three-core'
-            }
-            // React Three Fiber
-            if (id.indexOf('@react-three/fiber') !== -1) {
-              return 'r3f-core'
-            }
-            // React Three Drei 和其他扩展
-            if (id.indexOf('@react-three/drei') !== -1 || id.indexOf('@react-three/postprocessing') !== -1) {
-              return 'r3f-extras'
             }
             // Zustand 状态管理
             if (id.indexOf('zustand') !== -1) {
